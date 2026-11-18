@@ -1,53 +1,45 @@
-# Part 4a — Four-screen prototype (Engineering draft)
+# Part 4a prototype — OpenAI retrieval groundwork
 
-Status: **Implemented as untested browser-local prototype**, not a validated AI product or approved BR-002 scope.
+## Implemented code versus verification
 
-## Running locally
+The four screens still use browser-local storage. The optional Search Results panel
+calls a server-side OpenAI embeddings endpoint only after explicit consent and a
+reviewer access code. The code defaults to `text-embedding-3-small` and ranks up to
+20 saved records by cosine similarity. Evidence quotes the user's saved note and
+project; no source page is fetched and no article summary is generated.
 
-Serve this directory with any static local HTTP server, for example:
+This branch is NOT deployed. Live API credentials, real model quality, host routing,
+rate-limit enforcement and an independent reviewer flow are unverified.
 
-```sh
-python3 -m http.server 8000
-```
+## Important limits
 
-Visit http://localhost:8000. No dependencies or credentials are needed. Do not deploy or treat this as production-ready without separate approval and testing.
+- Saves persist only in the same browser/origin; a preview URL and production URL
+  have different local libraries. No cross-device sync or durable server database.
+- The reviewer code is a temporary paid-endpoint gate, NOT per-user authentication.
+- Search sends the query, saved notes and project labels to OpenAI. Original URLs,
+  IDs and full article content are not sent to the embedding provider.
+- Up to 20 records; 2,000 characters per note; 200 per project; 500 per query;
+  16,000 characters total; 64 KiB HTTP body. Larger libraries are rejected, not silently truncated.
+- Results are candidate matches, not proof. The default 0.35 cutoff is uncalibrated.
+- One batch per search, no embedding cache. Repeated searches re-embed the saved
+  context; durable per-user storage and a versioned embedding index are later work.
+- AI summaries, source ingestion, cited chatbot answers, registration and verified
+  emails remain unimplemented. Do not mark the entire SAVE → UNDERSTAND → RETRIEVE
+  journey complete based on this branch.
 
-## Implemented UI
+## Hosted acceptance tests — NOT EXECUTED
 
-- My Library: list locally saved sources, start a save or search.
-- Save Source: HTTP(S) URL, unchanged why-saved note, project; validates URL and stores in this browser's localStorage.
-- Source Details: original URL, original user note, project, and explicit AI-unavailable state.
-- Search Results: **lexical word-overlap only** on saved notes, project and URL; shows exact matched fields and opens original URL.
-
-The external source opens in a new tab, not an in-app fifth screen. The app does not fetch source pages or summarize their contents.
-
-## Explicit limitations / not implemented
-
-- No authenticated user identity, database, server-side storage, source parsing, embeddings, semantic retrieval, AI summaries, chatbot, API cost metering, deployed live URL, or independent test evidence.
-- Browser-local storage is not private account isolation and does not persist across devices. Avoid sensitive data.
-- Query paraphrases may fail lexical matching. The reviewer task involving “compares ways to code interviews” versus “interview coding approaches” **is not guaranteed to pass** without semantic retrieval or approved synonym handling.
-- A website cannot infer an article's claims from its link alone. The interface correctly reports AI understanding unavailable.
-- Browser storage may be unavailable/full, which displays an error.
-
-## Suggested acceptance tests (not yet executed)
-
-1. Open My Library in a clean browser profile: empty state.
-2. Save a valid HTTPS source, exact note and project: Source Details preserves note verbatim and shows original URL.
-3. Close and reopen in same browser: item appears in My Library.
-4. Search an exact phrase from the note: result and grounded field-overlap explanation appear.
-5. Search a paraphrase using different words: document whether it fails (expected possible failure).
-6. Search unrelated terms: no-match state.
-7. Enter malformed/unsupported URL: validation prevents save.
-8. Open Original: correct URL opens in separate tab.
-9. Disable localStorage or force storage error: verify error behavior.
-10. Run keyboard navigation and mobile viewport checks.
-
-## Proposed next integrations — require human scope/stack authorization
-
-1. Confirm Part 4a scope (BR-002) and human implementation/deployment owner.
-2. Add backend and a database with user-level access controls.
-3. Add source ingestion with permission-aware, reliable provenance and explicit unsupported states.
-4. Add swappable embedding/model services, semantic retrieval, grounded why-match explanations, logging and cost controls.
-5. Conduct the Nov 22 independent reviewer test and record objective evidence.
-
-Source: Product Design & Research Task 1 dated Nov 17, 2026. Design handoff was ready for Engineering review, not already implemented.
+1. Open the actual deployment in a fresh browser without a developer account.
+2. Save a permitted real research URL, exact why-saved note and project.
+3. Verify unchanged note, correct link, successful reload and new-tab link behavior.
+4. Try malformed URLs, storage errors and no-match searches; confirm honest messages.
+5. With AI disabled or wrong reviewer code, verify no paid provider request occurs.
+6. Enable AI after spending approval. Use the UX interview-coding query and at least
+   two further paraphrases against a multi-item library; record ranks and relevance judgments.
+7. Include unrelated queries; calibrate the cutoff using both relevant and irrelevant pairs.
+8. Verify explanations cite real notes, not inferred article claims. No source text means no article summary.
+9. Test 401, 403, 429, timeout and unavailable-provider paths; local search remains explicitly lexical.
+10. Inspect network traffic/build output: no OpenAI secret in browser files, DOM or requests.
+11. Verify Netlify's host-side rate limit, exact-origin policy, request sizes and token usage.
+12. Run keyboard, mobile and independent human reviewer tests. Record URL, commit,
+    timestamp, pass/fail evidence and costs. No assistance during the independent test.
