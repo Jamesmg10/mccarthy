@@ -1,23 +1,38 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="description" content="Save research with context. Find it again by meaning. A McCarthy project." />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Save research with context. Find it again by meaning. A McCarthy project.">
   <title>HiveMind — Research Library</title>
-  <link rel="stylesheet" href="./styles.css" />
+  <link rel="stylesheet" href="./styles.css">
+  <script src="./core.js" defer></script>
   <script src="./ai-search.js" defer></script>
+  <script src="./knowledge-graph.js" defer></script>
   <script src="./app.js" defer></script>
 </head>
 <body>
+  <a class="skip-link" href="#app">Skip to content</a>
   <header class="topbar">
-    <div class="brand-group">
-      <a class="brand" href="#library">HiveMind</a>
-      <span class="brand-description">Research, kept in context.</span>
-    </div>
-    <span class="prototype-label">Research library · Brand preview</span>
+    <a class="brand" href="#library"><svg aria-hidden="true" viewBox="0 0 32 32"><path d="M10 3 19 8v10l-9 5-9-5V8Zm12 6 9 5v10l-9 5-9-5V14Z"/></svg>HiveMind</a>
+    <form id="global-search" role="search"><label class="sr" for="global-query">Search My Library</label><input id="global-query" name="query" maxlength="500" placeholder="Search your library by remembered context…" required><button class="secondary" type="submit">Search</button></form>
+    <span class="prototype-label">Workspace preview</span>
   </header>
-  <main id="app" tabindex="-1" aria-live="polite"></main>
-  <footer>A McCarthy project. Prototype only. Records are saved in this browser. Optional AI search sends your notes, project labels and query to OpenAI with consent. Do not use sensitive data.</footer>
+  <div class="workspace">
+    <aside class="sidebar">
+      <p class="nav-label">YOUR WORKSPACE</p>
+      <nav aria-label="Main navigation">
+        <a href="#library" data-nav="library"><span aria-hidden="true">▤</span> My Library</a>
+        <a href="#search/" data-nav="search"><span aria-hidden="true">⌕</span> Search</a>
+        <a href="#graph" data-nav="graph"><span aria-hidden="true">◇</span> Knowledge Graph</a>
+      </nav>
+      <a class="button save-shortcut" href="#save">+ Save Source</a>
+      <div class="sidebar-note"><strong>Research, kept in context.</strong><p>Your library is saved in this browser. The graph uses the project labels you saved—not browsing history.</p></div>
+    </aside>
+    <div class="main-column">
+      <main id="app" tabindex="-1"></main>
+      <footer>A McCarthy project. Prototype only. Records are saved in this browser. Optional AI search sends your notes, project labels and query to OpenAI with consent. Do not use sensitive data.</footer>
+    </div>
+  </div>
 </body>
 </html>
