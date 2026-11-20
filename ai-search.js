@@ -8,14 +8,14 @@ window.attachSemanticSearch = function ({ query, records, renderCard, root }) {
     <div class="search-controls"><div class="field"><label for="search-mode">Search mode</label>
     <select id="search-mode"><option value="word">Word match · on this device</option><option value="semantic">By meaning · OpenAI</option></select></div></div>
     <section class="access-panel" id="ai-access" hidden><h2>Meaning-based search</h2>
-    <p class="help">Your query, selected saved notes and project labels are sent to OpenAI through our server. URLs and article text are not sent. This does not read or summarize articles.</p>
+    <p class="help">Your query, selected saved notes and project labels are sent to OpenAI through our server. URLs, source excerpts and Second Mind fields are not sent. This does not read or summarize articles.</p>
     <div class="field"><label for="reviewer-code">Reviewer demo access code — not an OpenAI API key</label><input id="reviewer-code" type="password" autocomplete="off" minlength="32" maxlength="256"></div>
     <details><summary>Choose sources to search <span id="selection-count"></span></summary><p class="help">The pilot supports 1–20 selected sources and 16,000 total context characters. Your full library is retained.</p>
     <div class="actions"><button type="button" class="secondary" id="select-all">Select all</button><button type="button" class="secondary" id="clear-selection">Clear selection</button></div>
     <div class="source-picker">${records.map((r,i) => `<label class="source-choice"><input type="checkbox" name="source" value="${i}" checked><span>${esc(r.title)}${C.recordIssue(r) ? ` — ${esc(C.recordIssue(r))}` : ''}</span></label>`).join('')}</div></details>
     <label class="consent"><input id="consent" type="checkbox">I agree to send the selected notes, project labels and my query to OpenAI. They contain no sensitive data.</label>
     </section>
-    <p id="search-help" class="help">Word matching searches saved titles, notes, project labels and URLs. Choose By meaning for contextual retrieval.</p>
+    <p id="search-help" class="help">Word matching searches titles, notes, project labels, URLs and your local Second Mind fields. Choose By meaning for contextual retrieval.</p>
     <div class="search-status" role="status" aria-live="polite"></div><div class="search-results" aria-label="Search results"></div>`;
   const form = root.querySelector('#search-form'), input = root.querySelector('#query');
   const mode = root.querySelector('#search-mode'), access = root.querySelector('#ai-access');
@@ -39,7 +39,7 @@ window.attachSemanticSearch = function ({ query, records, renderCard, root }) {
     button.textContent = mode.value === 'semantic' ? 'Search by meaning' : 'Search';
     root.querySelector('#search-help').textContent = mode.value === 'semantic'
       ? 'Results will be ranked against the selected saved context. Similarity is not proof of an article claim.'
-      : 'Word matching searches saved titles, notes, project labels and URLs. No AI request is made.';
+      : 'Word matching searches titles, notes, project labels, URLs and your local Second Mind fields. No AI request is made.';
   });
   access.addEventListener('change', event => {
     if (event.target.name === 'source') { count(); consent.checked = false; invalidate('Selection changed. Review consent and search again.'); }

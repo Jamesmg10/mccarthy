@@ -7,3 +7,26 @@
 @media(max-width:380px){.search{flex-direction:column}.graph-canvas svg{height:330px}#global-search button{padding:.5rem .7rem}}
 
 .graph-detail:focus{outline:2px solid var(--focus);outline-offset:-2px}
+
+/* Second Mind: quiet structure, not dashboard decoration. */
+.code-steps { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:.75rem; margin:1.5rem 0; }
+.code-steps a { padding:1rem; border:1px solid var(--line); border-radius:4px; text-decoration:none; background:var(--surface); }
+.code-steps strong, .code-steps span { display:block; }
+.code-steps span { color:var(--muted); font-size:.85rem; margin-top:.4rem; }
+.para-grid { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:.75rem; }
+.para-stat { display:flex; flex-direction:column; gap:.5rem; text-decoration:none; margin:0; }
+.para-stat span { font-family:Georgia,serif; font-size:2rem; }
+.memory-badge { color:var(--forest); font-size:.8rem; border-left:2px solid var(--field-line); padding-left:.6rem; }
+#mind-form fieldset, #brief-form fieldset { min-width:0; border:0; border-top:1px solid var(--line); padding:1rem 0; margin-top:1.5rem; }
+#mind-form legend, #brief-form legend { padding-right:.7rem; font-weight:600; color:var(--forest); }
+#brief-text { font-family:ui-monospace,monospace; font-size:.85rem; margin:1rem 0; }
+#brief-form .source-choice { display:flex; align-items:flex-start; gap:.75rem; padding:.75rem 0; font-weight:400; }
+#brief-form .source-choice input { width:18px; min-height:18px; flex:0 0 18px; margin-top:.25rem; }
+#brief-form small { display:block; color:var(--muted); }
+#second-mind-editor { margin-top:1.5rem; }
+@media(max-width:900px){.para-grid{grid-template-columns:repeat(3,minmax(0,1fr));}.code-steps{grid-template-columns:repeat(2,minmax(0,1fr));}}
+@media(max-width:450px){.para-grid,.code-steps{grid-template-columns:1fr;}}
+
+.graph-node.projects .node-shape { fill:#e8eee9;stroke:#174b3d; }
+.graph-node.areas .node-shape { fill:#e4eef0;stroke:#35616a; }
+.graph-node.resources .node-shape { fill:#f3ebd8;stroke:#80602e; }

@@ -9,7 +9,7 @@
   const openLink = (r,cls='secondary') => `<a class="button ${cls}" href="${esc(C.safeURL(r.url))}" target="_blank" rel="noopener noreferrer">Open Original ↗</a>`;
   function card(r,evidence='') {
     return `<article class="card"><div class="eyebrow">${esc(r.project || 'Unassigned project')}</div><h2><a href="${href(r.id)}">${esc(r.title)}</a></h2>
-      <p class="source-domain">${esc(domain(r.url))} · Saved ${esc(date(r.createdAt))}</p><p class="original-note">${esc(r.whySaved)}</p>
+      <p class="source-domain">${esc(domain(r.url))} · Saved ${esc(date(r.createdAt))}</p><p class="memory-badge">${esc(window.HiveMindSecondMind.label(r))}</p><p class="original-note">${esc(r.whySaved)}</p>
       ${evidence ? `<div class="evidence"><strong>Why this matches</strong><p>${esc(evidence)}</p></div>` : ''}
       <div class="actions"><a class="button secondary" href="${href(r.id)}">View details</a>${openLink(r)}</div></article>`;
   }
@@ -58,14 +58,15 @@
       } catch (e) { app.querySelector('#formError').innerHTML = `<p class="notice error">${esc(e.message || 'Unable to save. Storage may be disabled or full.')}</p>`; }
     });
   }
-  function details(records,id) {
+  function details(records,id,snapshot) {
     const r = records.find(item => item.id === id); if (!r) { missing(); return; }
     app.innerHTML = (savedNotice ? `<p class="notice" role="status">${esc(savedNotice)}</p>` : '') + '<p class="breadcrumb"><a href="#library">← My Library</a></p>' + head('Source Details','Your source and the context you saved with it.',false) +
       `<article class="card"><div class="eyebrow">SAVED SOURCE</div><h2>${esc(r.title)}</h2><p class="source-domain">${esc(domain(r.url))}</p><div class="detail-grid"><section><h3>Your original note</h3><p class="quote">${esc(r.whySaved)}</p>
-      <div class="notice"><strong>AI summary unavailable</strong><p>Article text has not been fetched or analyzed. Only your saved URL and note are available; no article claims are generated.</p></div></section>
+      <div class="notice"><strong>AI summary unavailable</strong><p>No article has been fetched or AI summary generated. Any excerpt or takeaway below is supplied by you and has not been verified by HiveMind.</p></div></section>
       <aside class="detail-meta"><p><strong>Project</strong><br>${esc(r.project || 'Unassigned')}</p><p><strong>Saved</strong><br>${esc(date(r.createdAt))}</p><p><a href="${esc(C.safeURL(r.url))}" target="_blank" rel="noopener noreferrer">${esc(r.url)}</a></p></aside></div>
       ${C.recordIssue(r) ? `<p class="notice error">Not eligible for meaning-based search: ${esc(C.recordIssue(r))} Edit this source to correct it.</p>` : ''}
-      <div class="actions">${openLink(r,'')}<a class="button secondary" href="#edit/${encodeURIComponent(r.id)}">Edit Source</a><a class="button secondary" href="#graph">Explore graph</a></div></article>`;
+      <div class="actions">${openLink(r,'')}<a class="button secondary" href="#edit/${encodeURIComponent(r.id)}">Edit Source</a><a class="button secondary" href="#graph">Explore graph</a></div></article><div id="second-mind-editor"></div>`;
+    cleanup = window.mountSecondMindEditor({root:app.querySelector('#second-mind-editor'),snapshot,record:r,onSaved:()=>{savedNotice='Second Mind notes saved in this browser.';render();}});
   }
   function missing() { app.innerHTML = head('Source not found','This source is not in the library saved in this browser.',false) + '<a class="button secondary" href="#library">Back to Library</a>'; }
   function render() {
@@ -78,12 +79,15 @@
       if (el.dataset.nav === page || (['save','edit','details'].includes(page) && el.dataset.nav === 'library')) el.setAttribute('aria-current','page');
       else el.removeAttribute('aria-current');
     });
+    document.querySelectorAll('[data-mind]').forEach(el=>{if(page==='mind'&&el.dataset.mind===value)el.setAttribute('aria-current','page');else el.removeAttribute('aria-current');});
     app.classList.toggle('graph-page',page === 'graph');
     try {
       const snapshot = C.readLibrary(localStorage);
       if (page === 'save' || page === 'edit') editor(snapshot,page === 'edit' ? value : null);
-      else if (page === 'details') details(snapshot.records,value);
-      else if (page === 'search') {
+      else if (page === 'details') details(snapshot.records,value,snapshot);
+      else if (page === 'mind') {
+        cleanup = window.mountSecondMind({root:app,snapshot,view:value,renderCard:card});
+      } else if (page === 'search') {
         app.innerHTML = head('Search Results','Find saved research by the context you remember.',false) + '<section id="search-workspace"></section>';
         cleanup = window.attachSemanticSearch({query:value,records:snapshot.records,renderCard:card,root:app.querySelector('#search-workspace')});
         document.getElementById('global-query').value = value;

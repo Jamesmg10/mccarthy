@@ -7,6 +7,8 @@
   <title>HiveMind — Research Library</title>
   <link rel="stylesheet" href="./styles.css">
   <script src="./core.js" defer></script>
+  <script src="./second-mind.js" defer></script>
+  <script src="./second-mind-ui.js" defer></script>
   <script src="./ai-search.js" defer></script>
   <script src="./knowledge-graph.js" defer></script>
   <script src="./app.js" defer></script>
@@ -26,8 +28,18 @@
         <a href="#search/" data-nav="search"><span aria-hidden="true">⌕</span> Search</a>
         <a href="#graph" data-nav="graph"><span aria-hidden="true">◇</span> Knowledge Graph</a>
       </nav>
+      <p class="nav-label">SECOND MIND</p>
+      <nav aria-label="Second Mind organization">
+        <a href="#mind" data-nav="mind">Overview</a>
+        <a href="#mind/inbox" data-mind="inbox">Inbox</a>
+        <a href="#mind/projects" data-mind="projects">Projects</a>
+        <a href="#mind/areas" data-mind="areas">Areas</a>
+        <a href="#mind/resources" data-mind="resources">Resources</a>
+        <a href="#mind/archives" data-mind="archives">Archives</a>
+        <a href="#mind/express" data-mind="express">Write a brief</a>
+      </nav>
       <a class="button save-shortcut" href="#save">+ Save Source</a>
-      <div class="sidebar-note"><strong>Research, kept in context.</strong><p>Your library is saved in this browser. The graph uses the project labels you saved—not browsing history.</p></div>
+      <div class="sidebar-note"><strong>Research, kept in context.</strong><p>Your library is saved in this browser. Organize with PARA and write your own takeaways. Graph connections use saved fields—not browsing history.</p></div>
     </aside>
     <div class="main-column">
       <main id="app" tabindex="-1"></main>
