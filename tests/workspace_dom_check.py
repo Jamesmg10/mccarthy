@@ -28,7 +28,7 @@ with sync_playwright() as p:
   if(!crypto.randomUUID) crypto.randomUUID=()=> 'generated-'+Math.random().toString(16).slice(2);
   window.fetch=async (url,opts)=>{window.sent.push({url,body:JSON.parse(opts.body)});return {ok:true,json:async()=>({mode:'semantic',matches:[{id:'a',score:.7}]})}};
  }''',[fixture,KEY])
- for file in ['core.js','ai-search.js','knowledge-graph.js','app.js']: page.add_script_tag(content=(ROOT/file).read_text())
+ for file in ['core.js','second-mind.js','second-mind-ui.js','ai-search.js','knowledge-graph.js','app.js']: page.add_script_tag(content=(ROOT/file).read_text())
  def route(value):
   page.evaluate('(v)=>{location.hash=v}',value);page.wait_for_timeout(70)
  def semantic():

@@ -52,7 +52,7 @@
   function wordMatches(query, records) {
     const terms = tokens(query);
     return records.map(record => {
-      const evidence = [['title',record.title],['saved note',record.whySaved],['project',record.project],['source URL',record.url]].flatMap(([field,text]) => {
+      const evidence = [['title',record.title],['saved note',record.whySaved],['project',record.project],['source URL',record.url],...(root.HiveMindSecondMind?.wordFields(record)||[])].flatMap(([field,text]) => {
         const found = terms.filter(t => tokens(text).some(w => w === t || w.startsWith(t) || t.startsWith(w)));
         return found.length ? [{field, terms:found}] : [];
       });
