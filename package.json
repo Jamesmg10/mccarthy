@@ -5,7 +5,9 @@
   "scripts": {
     "test": "node --test tests/*.test.mjs",
     "build": "node scripts/build.mjs",
-    "check": "node --check app.js && node --check ai-search.js && node --check netlify/functions/semantic-search.mjs"
+    "check": "node --check core.js && node --check app.js && node --check ai-search.js && node --check knowledge-graph.js && node --check netlify/functions/semantic-search.mjs"
   },
-  "engines": { "node": ">=22" }
+  "engines": {
+    "node": ">=22"
+  }
 }

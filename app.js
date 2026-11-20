@@ -1,18 +1,116 @@
-/* Local-library prototype with optional server-side semantic search. No account isolation. */
-const KEY='mccarthy-prototype-sources-v1';
-const app=document.getElementById('app');
-const escapeHtml=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const records=()=>{try{const value=JSON.parse(localStorage.getItem(KEY)||'[]');return Array.isArray(value)?value.filter(r=>r&&typeof r.id==='string'&&typeof r.title==='string'&&typeof r.whySaved==='string'&&(r.project===undefined||typeof r.project==='string')&&safeUrl(r.url)):[]}catch{return []}};
-const store=items=>localStorage.setItem(KEY,JSON.stringify(items));
-const safeUrl=value=>{try{const u=new URL(value);return ['https:','http:'].includes(u.protocol)?u.href:null}catch{return null}};
-const tokens=s=>[...new Set(String(s).toLowerCase().match(/[a-z0-9]{3,}/g)||[])].filter(w=>!['the','this','that','with','from','about','saved','piece','article','because','ways'].includes(w));
-const href=id=>'#details/'+encodeURIComponent(id);
-function header(title,sub){return '<div class="toolbar"><div><h1>'+title+'</h1><p class="muted">'+sub+'</p></div><a class="button" href="#save">Save Source</a></div>'}
-function card(r,extra=''){return '<article class="card"><div class="eyebrow">'+escapeHtml(r.project||'Unassigned project')+'</div><h2><a href="'+href(r.id)+'">'+escapeHtml(r.title)+'</a></h2><p class="meta">Saved '+escapeHtml(new Date(r.createdAt).toLocaleDateString())+'</p><p>'+escapeHtml(r.whySaved||'No why-saved note')+'</p>'+extra+'<div class="actions"><a class="button secondary" href="'+href(r.id)+'">View details</a><a class="button secondary" href="'+escapeHtml(r.url)+'" target="_blank" rel="noopener noreferrer">Open Original</a></div></article>'}
-function library(){const rows=records().slice().reverse();app.innerHTML=header('My Library','Save what mattered, then find it again by remembered context.')+'<form class="search" id="search"><label class="sr" for="query">Search My Library</label><input id="query" name="query" placeholder="Search My Library" aria-label="Search My Library" required><button>Search</button></form>'+(rows.length?rows.map(r=>card(r)).join(''):'<div class="empty"><h2>Your library is empty</h2><p>Save a research link and describe why it mattered.</p><a class="button" href="#save">Save your first source</a></div>');document.getElementById('search').addEventListener('submit',e=>{e.preventDefault();location.hash='search/'+encodeURIComponent(e.currentTarget.elements.namedItem('query').value.trim())})}
-function save(){app.innerHTML='<h1>Save Source</h1><p class="muted">Capture the original link and your own research context.</p><form id="saveForm" class="card"><div class="field"><label for="url">Source URL</label><input type="url" id="url" name="url" placeholder="https://example.org/article" required></div><div class="field"><label for="note">Why did you save this?</label><textarea id="note" name="note" placeholder="I saved this because..." required></textarea></div><div class="field"><label for="project">Research project/topic</label><input id="project" name="project" placeholder="Research Methods"></div><div id="formError" role="alert"></div><div class="actions"><button type="submit">Save</button><a class="button secondary" href="#library">Cancel</a></div></form>';document.getElementById('saveForm').addEventListener('submit',e=>{e.preventDefault();const f=e.currentTarget;const url=safeUrl(f.elements.namedItem('url').value.trim());if(!url){document.getElementById('formError').innerHTML='<p class="notice error">Enter a valid HTTP or HTTPS URL.</p>';return}const r={id:crypto.randomUUID(),url,title:new URL(url).hostname,whySaved:f.elements.namedItem('note').value,project:f.elements.namedItem('project').value.trim(),createdAt:new Date().toISOString()};try{store([...records(),r]);location.hash=href(r.id).slice(1)}catch{document.getElementById('formError').innerHTML='<p class="notice error">Unable to save. Browser storage may be disabled or full.</p>'}})}
-function details(id){const r=records().find(x=>x.id===id);if(!r){missing();return}app.innerHTML='<p><a href="#library">← My Library</a></p><h1>Source Details</h1><article class="card"><h2>'+escapeHtml(r.title)+'</h2><p><a href="'+escapeHtml(r.url)+'" target="_blank" rel="noopener noreferrer">'+escapeHtml(r.url)+'</a></p><p><strong>Project:</strong> '+escapeHtml(r.project||'Unassigned')+'</p><h2>Your original note</h2><p class="quote">'+escapeHtml(r.whySaved)+'</p><div class="notice"><strong>AI summary unavailable.</strong><p>Article text has not been fetched or analyzed. Only your saved URL and note are available; no article claims are generated.</p></div><div class="actions"><a class="button" target="_blank" rel="noopener noreferrer" href="'+escapeHtml(r.url)+'">Open Original</a><a class="button secondary" href="#library">Back to Library</a></div></article>'}
-function search(query){const terms=tokens(query);const found=records().map(r=>{const fields=[['your saved note',r.whySaved],['project',r.project],['source URL',r.url]];const reasons=fields.flatMap(([label,text])=>{const matched=terms.filter(t=>tokens(text).some(w=>w===t||w.startsWith(t)||t.startsWith(w)));return matched.length?[{label,matched}]:[]});return {r,reasons,score:reasons.reduce((sum,v)=>sum+v.matched.length,0)}}).filter(x=>x.score>0).sort((a,b)=>b.score-a.score);app.innerHTML='<p><a href="#library">← My Library</a></p><h1>Search Results</h1><form class="search" id="search"><input name="query" aria-label="Search My Library" required value="'+escapeHtml(query)+'"><button>Search</button></form><div class="notice"><strong>Search limitation:</strong> This prototype uses word overlap in saved notes, projects and URLs. Optional meaning-based search is available in the panel above only after hosted setup.</div>'+(found.length?'<p>'+found.length+' matching saved source(s)</p>'+found.map(({r,reasons})=>card(r,'<p><strong>Why this matches:</strong> '+reasons.map(v=>escapeHtml(v.label)+' contains '+escapeHtml(v.matched.join(', '))).join('; ')+'.</p>')).join(''):'<div class="empty"><h2>No matches found</h2><p>Try terms from your saved note or project. This is not semantic search.</p></div>');window.attachSemanticSearch?.({query,records:records(),renderCard:card,root:app});document.getElementById('search').addEventListener('submit',e=>{e.preventDefault();location.hash='search/'+encodeURIComponent(e.currentTarget.elements.namedItem('query').value.trim())})}
-function missing(){app.innerHTML='<h1>Source not found</h1><p class="notice error">This record is not in your current browser storage.</p><a class="button secondary" href="#library">Back to Library</a>'}
-function render(){let hash;try{hash=decodeURIComponent(location.hash.slice(1)||'library')}catch{missing();return}const [page,...rest]=hash.split('/');if(page==='save')save();else if(page==='details')details(rest.join('/'));else if(page==='search')search(rest.join('/'));else library();app.focus({preventScroll:true})}
-window.addEventListener('hashchange',render);render();
+/* Local research workspace. Existing storage key and API contract preserved. */
+(() => {
+  'use strict';
+  const C = window.HiveMindCore, esc = C.escapeHTML, app = document.getElementById('app');
+  let cleanup = null, savedNotice = '';
+  const href = id => `#details/${encodeURIComponent(id)}`;
+  const date = value => { const d = new Date(value); return Number.isNaN(d.getTime()) ? 'Date unavailable' : d.toLocaleDateString(); };
+  const domain = url => { try { return new URL(url).hostname; } catch { return 'Source'; } };
+  const openLink = (r,cls='secondary') => `<a class="button ${cls}" href="${esc(C.safeURL(r.url))}" target="_blank" rel="noopener noreferrer">Open Original ↗</a>`;
+  function card(r,evidence='') {
+    return `<article class="card"><div class="eyebrow">${esc(r.project || 'Unassigned project')}</div><h2><a href="${href(r.id)}">${esc(r.title)}</a></h2>
+      <p class="source-domain">${esc(domain(r.url))} · Saved ${esc(date(r.createdAt))}</p><p class="original-note">${esc(r.whySaved)}</p>
+      ${evidence ? `<div class="evidence"><strong>Why this matches</strong><p>${esc(evidence)}</p></div>` : ''}
+      <div class="actions"><a class="button secondary" href="${href(r.id)}">View details</a>${openLink(r)}</div></article>`;
+  }
+  function head(title,description,action=true) {
+    return `<div class="page-head"><div><p class="eyebrow">YOUR RESEARCH WORKSPACE</p><h1>${title}</h1><p>${description}</p></div>${action ? '<a class="button" href="#save">+ Save Source</a>' : ''}</div>`;
+  }
+  function library(records) {
+    app.innerHTML = head('My Library','Keep the source. Remember why it mattered.') +
+      `<div class="toolbar"><p class="stats">${records.length} saved source${records.length === 1 ? '' : 's'} · On this device</p><div class="field"><label for="library-project">Filter by project</label><select id="library-project"><option value="">All projects</option>${[...new Set(records.map(r => r.project || '').filter(Boolean))].sort().map(p => `<option value="${esc(p)}">${esc(p)}</option>`).join('')}</select></div></div><div id="library-results"></div>`;
+    const output = app.querySelector('#library-results'), filter = app.querySelector('#library-project');
+    function draw() {
+      const rows = records.filter(r => !filter.value || r.project === filter.value).slice().reverse();
+      output.className = rows.length ? 'source-list' : '';
+      output.innerHTML = rows.length ? rows.map(r => card(r)).join('') : `<div class="empty"><h2>${records.length ? 'No sources in this project' : 'Your library starts here'}</h2><p>Save a research link and why it mattered. Your project labels will also connect sources in the graph.</p><a class="button" href="#save">Save your first source</a></div>`;
+    }
+    filter.addEventListener('change',draw); draw();
+  }
+  function editor(snapshot,id) {
+    const original = id ? snapshot.records.find(r => r.id === id) : null;
+    if (id && !original) { missing(); return; }
+    const r = original || {url:'',title:'',whySaved:'',project:''};
+    app.innerHTML = `<p class="breadcrumb"><a href="${original ? href(id) : '#library'}">← ${original ? 'Source Details' : 'My Library'}</a></p>` +
+      head(original ? 'Edit Source' : 'Save Source','Capture the context you will want to remember.',false) +
+      `<form id="saveForm" class="card editor" novalidate><div class="field"><label for="url">Source URL</label><input type="url" id="url" name="url" required value="${esc(r.url)}" placeholder="https://…"></div>
+      <div class="field"><label for="title">Display title <span class="muted">(optional)</span></label><input id="title" name="title" maxlength="240" value="${esc(r.title)}" aria-describedby="title-help"><p class="help" id="title-help">Use your own title. Leaving this blank uses the website domain; HiveMind does not fetch the article title.</p></div>
+      <div class="field"><label for="note">Why did you save this?</label><textarea id="note" name="note" maxlength="2000" required aria-describedby="note-help">${esc(r.whySaved)}</textarea><p class="help" id="note-help">1–2,000 characters. Your note is preserved exactly as entered.</p></div>
+      <div class="field"><label for="project">Research project/topic <span class="muted">(optional)</span></label><input id="project" name="project" maxlength="200" value="${esc(r.project || '')}" placeholder="Research Methods"><p class="help">Up to 200 characters. The graph connects sources with this exact project label.</p></div>
+      <div id="formError" role="alert"></div><div class="actions"><button type="submit">${original ? 'Save changes' : 'Save Source'}</button><a class="button secondary" href="${original ? href(id) : '#library'}">Cancel</a></div></form>`;
+    const form = app.querySelector('#saveForm');
+    form.addEventListener('submit',event => {
+      event.preventDefault();
+      const value = name => form.elements.namedItem(name).value;
+      const url = C.safeURL(value('url').trim());
+      const candidate = {whySaved:value('note'),project:value('project')};
+      let error = !url ? 'Enter a valid HTTP or HTTPS URL.' : C.recordIssue(candidate);
+      if (!error && value('title').length > 240) error = 'The display title exceeds 240 characters.';
+      if (error) { app.querySelector('#formError').innerHTML = `<p class="notice error">${esc(error)}</p>`; return; }
+      const record = {...(original || {}),id:original?.id || crypto.randomUUID(),url:original && value('url') === original.url ? original.url : url,
+        title:value('title').trim() || domain(url),whySaved:candidate.whySaved,project:candidate.project,
+        createdAt:original?.createdAt || new Date().toISOString()};
+      try {
+        const next = original ? snapshot.records.map(old => old.id === id ? record : old) : [...snapshot.records,record];
+        C.writeLibrary(localStorage,next,snapshot.raw);
+        savedNotice = original ? 'Changes saved. Your original source and note are available below.' : 'Source saved in this browser.';
+        location.hash = href(record.id);
+      } catch (e) { app.querySelector('#formError').innerHTML = `<p class="notice error">${esc(e.message || 'Unable to save. Storage may be disabled or full.')}</p>`; }
+    });
+  }
+  function details(records,id) {
+    const r = records.find(item => item.id === id); if (!r) { missing(); return; }
+    app.innerHTML = (savedNotice ? `<p class="notice" role="status">${esc(savedNotice)}</p>` : '') + '<p class="breadcrumb"><a href="#library">← My Library</a></p>' + head('Source Details','Your source and the context you saved with it.',false) +
+      `<article class="card"><div class="eyebrow">SAVED SOURCE</div><h2>${esc(r.title)}</h2><p class="source-domain">${esc(domain(r.url))}</p><div class="detail-grid"><section><h3>Your original note</h3><p class="quote">${esc(r.whySaved)}</p>
+      <div class="notice"><strong>AI summary unavailable</strong><p>Article text has not been fetched or analyzed. Only your saved URL and note are available; no article claims are generated.</p></div></section>
+      <aside class="detail-meta"><p><strong>Project</strong><br>${esc(r.project || 'Unassigned')}</p><p><strong>Saved</strong><br>${esc(date(r.createdAt))}</p><p><a href="${esc(C.safeURL(r.url))}" target="_blank" rel="noopener noreferrer">${esc(r.url)}</a></p></aside></div>
+      ${C.recordIssue(r) ? `<p class="notice error">Not eligible for meaning-based search: ${esc(C.recordIssue(r))} Edit this source to correct it.</p>` : ''}
+      <div class="actions">${openLink(r,'')}<a class="button secondary" href="#edit/${encodeURIComponent(r.id)}">Edit Source</a><a class="button secondary" href="#graph">Explore graph</a></div></article>`;
+  }
+  function missing() { app.innerHTML = head('Source not found','This source is not in the library saved in this browser.',false) + '<a class="button secondary" href="#library">Back to Library</a>'; }
+  function render() {
+    cleanup?.(); cleanup = null;
+    let hash;
+    try { hash = decodeURIComponent(location.hash.slice(1) || 'library'); } catch { missing(); return; }
+    if (hash === 'app') { app.focus(); return; }
+    const [page,...rest] = hash.split('/'), value = rest.join('/');
+    document.querySelectorAll('[data-nav]').forEach(el => {
+      if (el.dataset.nav === page || (['save','edit','details'].includes(page) && el.dataset.nav === 'library')) el.setAttribute('aria-current','page');
+      else el.removeAttribute('aria-current');
+    });
+    app.classList.toggle('graph-page',page === 'graph');
+    try {
+      const snapshot = C.readLibrary(localStorage);
+      if (page === 'save' || page === 'edit') editor(snapshot,page === 'edit' ? value : null);
+      else if (page === 'details') details(snapshot.records,value);
+      else if (page === 'search') {
+        app.innerHTML = head('Search Results','Find saved research by the context you remember.',false) + '<section id="search-workspace"></section>';
+        cleanup = window.attachSemanticSearch({query:value,records:snapshot.records,renderCard:card,root:app.querySelector('#search-workspace')});
+        document.getElementById('global-query').value = value;
+      } else if (page === 'graph') {
+        app.innerHTML = head('Knowledge Graph','Explore how your saved sources connect through your research projects.') + '<section id="knowledge-workspace"></section>';
+        cleanup = window.mountKnowledgeGraph({records:snapshot.records,root:app.querySelector('#knowledge-workspace')});
+      } else library(snapshot.records);
+    } catch (error) { app.innerHTML = head('Library unavailable','Your stored data has not been cleared or replaced.',false) + `<p class="notice error" role="alert">${esc(error.message)}</p>`; }
+    savedNotice = '';
+    app.focus({preventScroll:true});
+  }
+  document.querySelector('.skip-link').addEventListener('click',event => { event.preventDefault(); app.focus(); });
+  document.getElementById('global-search').addEventListener('submit',event => {
+    event.preventDefault(); const value = event.currentTarget.elements.namedItem('query').value;
+    const input = event.currentTarget.elements.namedItem('query');
+    input.setCustomValidity(C.queryIssue(value)); if (!input.reportValidity()) return;
+    const next = `#search/${encodeURIComponent(value.trim())}`;
+    if (location.hash === next) render(); else location.hash = next;
+  });
+  document.getElementById('global-query').addEventListener('input',event => event.target.setCustomValidity(''));
+  window.addEventListener('hashchange',render);
+  // Invalidate stale search snapshots without auto-saving or silently losing a dirty form.
+  window.addEventListener('storage',event => {
+    if (event.key !== C.KEY) return;
+    cleanup?.(); cleanup = null;
+    const warning = document.createElement('p'); warning.className = 'notice'; warning.setAttribute('role','alert');
+    warning.textContent = 'Your library changed in another tab. Reload before saving or searching. Unsaved form text is still here.'; app.prepend(warning);
+  });
+  render();
+})();
