@@ -1,0 +1,58 @@
+{
+  "candidate": "219cb34356cc314ea22327f0bf50807731553658",
+  "origin": "http://localhost:8888",
+  "startedAt": "2026-11-20T01:01:21.532Z",
+  "completedAt": "2026-11-20T01:01:23.208Z",
+  "transport": "Real HTTP request to existing local Netlify backend and OpenAI; no mock transport",
+  "authorizedPaidRequestsAttempted": 1,
+  "gates": {
+    "missingReviewerCode": 401,
+    "missingConsent": 400
+  },
+  "permittedSourceUrl": "https://www.techinterviewhandbook.org/coding-interview-prep/",
+  "sourceContentFetchedBySearch": false,
+  "fixtureNote": "Synthetic reviewer notes, not claims about the source article; unrelated fixtures included.",
+  "payload": {
+    "query": "the piece about interview coding approaches",
+    "consent": true,
+    "records": [
+      {
+        "id": "a9a72a56-2eb3-47ad-b268-3e768b1a51f5",
+        "whySaved": "I saved this because it compares ways to code interviews",
+        "project": "Research Methods"
+      },
+      {
+        "id": "reviewer-garden",
+        "whySaved": "Test fixture: growing tomatoes and composting vegetables",
+        "project": "Garden"
+      },
+      {
+        "id": "reviewer-travel",
+        "whySaved": "Test fixture: booking train tickets for a summer holiday",
+        "project": "Travel"
+      }
+    ]
+  },
+  "httpStatus": 200,
+  "result": {
+    "mode": "semantic",
+    "model": "text-embedding-3-small",
+    "evidenceBasis": "user_note_and_project",
+    "threshold": 0.35,
+    "thresholdCalibrated": false,
+    "matches": [
+      {
+        "id": "a9a72a56-2eb3-47ad-b268-3e768b1a51f5",
+        "score": 0.6552,
+        "evidence": {
+          "note": "I saved this because it compares ways to code interviews",
+          "project": "Research Methods"
+        },
+        "explanation": "Ranked by meaning similarity to your saved note and project. No article text was read."
+      }
+    ],
+    "usage": {
+      "inputTokens": 57
+    }
+  }
+}

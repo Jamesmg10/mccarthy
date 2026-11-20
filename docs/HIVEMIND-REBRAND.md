@@ -27,7 +27,7 @@ glow, decorative AI icons, animated backgrounds, or fabricated counts.
 
 ## This change
 
-Only `index.html`, `styles.css` and this document change. The interface wordmark,
+The original draft changed only `index.html`, `styles.css` and this document. The interface wordmark,
 page title and metadata use HiveMind, with a visible Brand preview label and McCarthy
 attribution. All existing privacy and AI limitations remain visible.
 
@@ -62,3 +62,44 @@ or legal conclusion. Growth should evaluate naming/positioning risk before launc
 
 The existing successful user test applies to the pre-rebrand prototype, not
 an automatic sign-off on these new presentation changes.
+
+## Candidate completion and fresh validation
+
+Completed the bounded implementation review on November 19, 2026 (EST).
+The reconciled work-branch starting point was
+`427e31b7e47079363c502d80e19de70d392b3978`; remote and local tracked files agreed.
+The functional baseline remains `c251f2a764ec75c5109f431003d4d8cd8462631f`.
+The pre-existing untracked `package-lock.json` and private environment file were
+left untouched.
+
+The identity, typography, palette, preview label, disclosure, script order and
+four-screen layout already met the specification. They were not redesigned.
+The sole remaining runtime correction is in `styles.css`: inherit
+`overflow-wrap: anywhere` throughout source cards. The measured draft overflowed
+at 320px with the human-selected source's hostname and with unbroken project
+labels. The corrected presentation commit is
+`219cb34356cc314ea22327f0bf50807731553658`. All protected functional/configuration
+files still match the functional baseline byte-for-byte.
+
+[Fresh acceptance results and screenshot index](hivemind-evidence/RESULTS.md)
+record the required checks, environments, fixture cleanup, failures and limitations.
+Syntax, all 23 existing server tests, and the unchanged build passed.
+All four screens passed the five required viewport widths, including long-content
+stress checks. One authorized real backend search returned the interview-coding
+note first (0.6552; 57 input tokens); unrelated notes were excluded.
+The success screenshots explicitly replay that captured response and are **not**
+evidence of a second live call or a fully live browser submission.
+
+Implementation is complete; regression coverage and live backend results are
+recorded, not blanket acceptance. Python Playwright, full browser-to-provider
+submission, observable external-tab opening, native browser zoom, and independent
+human candidate review remain limited or blocked as detailed in the results.
+Naming/public-adoption and release approval remain separate.
+
+No merge, deployment, repository/domain/origin rename, model/credential change or
+Google Drive/Agent Home update was performed. The deployment identifier was not
+supplied or changed. For an explicitly authorized rollback of this completion
+only, revert presentation commit `219cb34356cc314ea22327f0bf50807731553658`.
+For rollback of the complete preview, restore the baseline HTML/CSS through an
+approved revert or prior deployment; never wipe storage, change credentials or
+force-push. Preserve the current working deployment until release is approved.

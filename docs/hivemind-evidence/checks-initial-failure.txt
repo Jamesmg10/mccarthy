@@ -1,0 +1,184 @@
+Evidence command run: 2026-11-20T14:19:38Z
+
+> mccarthy-prototype@0.2.0 check
+> node --check app.js && node --check ai-search.js && node --check netlify/functions/semantic-search.mjs
+
+
+> mccarthy-prototype@0.2.0 test
+> node --test tests/*.test.mjs
+
+TAP version 13
+# Subtest: cosine measures vectors and rejects invalid inputs
+ok 1 - cosine measures vectors and rejects invalid inputs
+  ---
+  duration_ms: 1.391333
+  type: 'test'
+  ...
+# Subtest: payload allowlist excludes URLs and preserves original note
+ok 2 - payload allowlist excludes URLs and preserves original note
+  ---
+  duration_ms: 0.559584
+  type: 'test'
+  ...
+# Subtest: ranking uses provider indices, not array order
+ok 3 - ranking uses provider indices, not array order
+  ---
+  duration_ms: 16.750125
+  type: 'test'
+  ...
+# Subtest: disabled configuration makes no provider call
+ok 4 - disabled configuration makes no provider call
+  ---
+  duration_ms: 0.347042
+  type: 'test'
+  ...
+# Subtest: missing secret makes no provider call
+ok 5 - missing secret makes no provider call
+  ---
+  duration_ms: 0.2355
+  type: 'test'
+  ...
+# Subtest: short reviewer code fails closed
+ok 6 - short reviewer code fails closed
+  ---
+  duration_ms: 0.362958
+  type: 'test'
+  ...
+# Subtest: wrong reviewer code rejected before OpenAI
+ok 7 - wrong reviewer code rejected before OpenAI
+  ---
+  duration_ms: 0.211083
+  type: 'test'
+  ...
+# Subtest: foreign origin rejected before OpenAI
+ok 8 - foreign origin rejected before OpenAI
+  ---
+  duration_ms: 0.112125
+  type: 'test'
+  ...
+# Subtest: GET rejected
+ok 9 - GET rejected
+  ---
+  duration_ms: 0.286291
+  type: 'test'
+  ...
+# Subtest: non-JSON rejected
+ok 10 - non-JSON rejected
+  ---
+  duration_ms: 0.455791
+  type: 'test'
+  ...
+# Subtest: consent is mandatory
+ok 11 - consent is mandatory
+  ---
+  duration_ms: 0.404
+  type: 'test'
+  ...
+# Subtest: oversized body rejected before OpenAI
+ok 12 - oversized body rejected before OpenAI
+  ---
+  duration_ms: 0.488958
+  type: 'test'
+  ...
+# Subtest: malformed JSON rejected
+ok 13 - malformed JSON rejected
+  ---
+  duration_ms: 0.142791
+  type: 'test'
+  ...
+# Subtest: invalid query, duplicate ids, empty and oversized libraries rejected
+ok 14 - invalid query, duplicate ids, empty and oversized libraries rejected
+  ---
+  duration_ms: 0.126542
+  type: 'test'
+  ...
+# Subtest: invalid record types and limits rejected
+ok 15 - invalid record types and limits rejected
+  ---
+  duration_ms: 0.065042
+  type: 'test'
+  ...
+# Subtest: total context cap prevents large batches
+ok 16 - total context cap prevents large batches
+  ---
+  duration_ms: 0.079166
+  type: 'test'
+  ...
+# Subtest: invalid threshold or model fails closed
+ok 17 - invalid threshold or model fails closed
+  ---
+  duration_ms: 0.150333
+  type: 'test'
+  ...
+# Subtest: provider rate limit is surfaced without sensitive provider body
+ok 18 - provider rate limit is surfaced without sensitive provider body
+  ---
+  duration_ms: 0.305584
+  type: 'test'
+  ...
+# Subtest: provider failure does not retry or leak details
+ok 19 - provider failure does not retry or leak details
+  ---
+  duration_ms: 0.308625
+  type: 'test'
+  ...
+# Subtest: timeout returns useful failure without retry
+ok 20 - timeout returns useful failure without retry
+  ---
+  duration_ms: 0.469583
+  type: 'test'
+  ...
+# Subtest: invalid provider vector response is rejected
+ok 21 - invalid provider vector response is rejected
+  ---
+  duration_ms: 0.660917
+  type: 'test'
+  ...
+# Subtest: unrelated mock vectors produce no match
+ok 22 - unrelated mock vectors produce no match
+  ---
+  duration_ms: 0.485667
+  type: 'test'
+  ...
+# Subtest: Netlify rate-limit declaration and custom route exist (host enforcement not tested)
+ok 23 - Netlify rate-limit declaration and custom route exist (host enforcement not tested)
+  ---
+  duration_ms: 0.045375
+  type: 'test'
+  ...
+1..23
+# tests 23
+# suites 0
+# pass 23
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 83.172208
+
+> mccarthy-prototype@0.2.0 build
+> node scripts/build.mjs
+
+Built four static assets. Server functions are deployed separately by Netlify.
+PASS protected functional, config, existing test and environment-example blobs unchanged.
+PASS pre-existing untracked lockfile preserved.
+PASS required identity/disclosure, script order and restrained local-only stylesheet.
+PASS static build has exactly four allowlisted assets; all served bytes match.
+node:internal/modules/run_main:123
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: Screenshot width: details-320.png
+
+305 !== 320
+
+    at file:///Users/developer/.copilot/session-state/0c15b5b1-82f1-4f4d-b610-c2463ad571a9/files/verify-hivemind-evidence.mjs:45:10 {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: 305,
+  expected: 320,
+  operator: 'strictEqual',
+  diff: 'simple'
+}
+
+Node.js v22.20.0
